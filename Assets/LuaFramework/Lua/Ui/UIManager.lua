@@ -90,6 +90,11 @@ function UIManager:init()
     self._DicALLUIForms         = {}
     self._DicCurrentShowUIForms = {}
     self._StaCurrentUIForms     = {}
+    --正在显示的
+    self._showUIForms         = {}
+    for k , v in pairs(UIFormType) do
+        self._showUIForms[v] = {}
+    end
     --初始化加载（根UI窗体）Canvas预设
     --self:InitRootCanvasLoading()
     --得到UI根节点、全屏节点、固定节点、弹出节点
@@ -151,11 +156,13 @@ function UIManager:OpenUIForm(uiFormName)
     uiForm:Show()
     -- --根据不同的UI窗体的显示模式，分别作不同的加载处理
     local showMode = uiForm:GetShowMode()
+    local uiForms = self._showUIForms[showMode]
     if showMode == UIFormShowMode.Normal then                 --“普通显示”窗口模式
         --把当前窗体加载到“当前窗体”集合中。
         self._DicCurrentShowUIForms[uiForm:GetName()] = uiForm
+         -- table.insert(uiForms, 1 ,uiForm) 
     elseif showMode == UIFormShowMode.ReverseChange then         --需要“反向切换”窗口模式
-        table.insert(self._StaCurrentUIForms, 1 ,uiForm) 
+        table.insert(uiForms, 1 ,uiForm) 
         self:ResetMask()    
     elseif showMode == UIFormShowMode.HideOther then              --“隐藏其他”窗口模式
         for k , v in pairs(self._DicCurrentShowUIForms) do
@@ -203,9 +210,10 @@ end
 --（“反向切换”属性）窗体的出栈逻辑
 function UIManager:PopUIFroms(uiForm)
     uiForm:Hide()
-    for index, _uiForm in ipairs(self._StaCurrentUIForms) do
+    local uiForms = self._showUIForms[UIFormType.PopUp]
+    for index, _uiForm in ipairs(uiForms) do
         if _uiForm == uiForm then
-            table.remove(self._StaCurrentUIForms,index)
+            table.remove(self.uiForms,index)
             break
         end
     end
@@ -214,8 +222,9 @@ function UIManager:PopUIFroms(uiForm)
 end
 
 function UIManager:ResetMask()
+    local uiForms = self._showUIForms[UIFormType.PopUp]
     local mask 
-    for index, uiForm in ipairs(self._StaCurrentUIForms) do
+    for index, uiForm in ipairs(uiForms) do
         if not mask then 
             if uiForm:HasMask() then 
                 uiForm:ResetMask()
