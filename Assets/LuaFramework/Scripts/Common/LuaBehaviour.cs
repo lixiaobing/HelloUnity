@@ -9,21 +9,76 @@ namespace LuaFramework {
     public class LuaBehaviour : View {
         private string data = null;
         private Dictionary<string, LuaFunction> buttons = new Dictionary<string, LuaFunction>();
+        private Dictionary<string, LuaFunction> listeners = new Dictionary<string, LuaFunction>();
         protected void Awake() {
-            Util.CallMethod(name, "Awake", gameObject);
+            // Util.CallMethod(name, "Awake", gameObject);
+            OnListenter("Awake");
         }
 
         protected void Start() {
-            Util.CallMethod(name, "Start");
+            // Util.CallMethod(name, "Start");
+            OnListenter("Start");
+
         }
 
         protected void OnClick() {
-            Util.CallMethod(name, "OnClick");
+            // Util.CallMethod(name, "OnClick");
+            OnListenter("OnClick");
         }
 
         protected void OnClickEvent(GameObject go) {
-            Util.CallMethod(name, "OnClick", go);
+            OnListenter("OnClickEvent",go);
         }
+
+        private void OnListenter(string eventType)
+        {
+            print(name +" " +eventType + " LuaBehaviour");
+            OnListenter(eventType, null);
+        }
+        private void OnListenter(string eventType,GameObject go)
+        {
+            LuaFunction luafunc = null;
+            listeners.TryGetValue(eventType, out luafunc);
+            if (luafunc != null)
+            {
+                if(go!= null)
+                {
+                    luafunc.Call(go);
+                }
+                else
+                {
+                    luafunc.Call();
+                }
+            }
+        }
+        public void AddEventListener(string eventType,LuaFunction luafunc) {
+            listeners.Add(eventType, luafunc);
+        }
+
+        public void RemoveEventListener(string eventType)
+        {
+            LuaFunction luafunc = null;
+            if (listeners.TryGetValue(eventType, out luafunc))
+            {
+                luafunc.Dispose();
+                luafunc = null;
+                listeners.Remove(eventType);
+            }
+
+        }
+
+        public void ClearEventListener()
+        {
+            foreach (var de in listeners)
+            {
+                if (de.Value != null)
+                {
+                    de.Value.Dispose();
+                }
+            }
+            listeners.Clear();
+        }
+
 
         /// <summary>
         /// 添加单击事件
@@ -67,9 +122,11 @@ namespace LuaFramework {
         //-----------------------------------------------------------------
         protected void OnDestroy() {
             ClearClick();
+            ClearEventListener();
 #if ASYNC_MODE
-            string abName = name.ToLower().Replace("panel", "");
-            ResManager.UnloadAssetBundle(abName + AppConst.ExtName);
+            //TODO 清理内存先注释掉
+            //string abName = name.ToLower().Replace("panel", "");
+            //ResManager.UnloadAssetBundle(abName + AppConst.ExtName);
 #endif
             Util.ClearMemory();
             Debug.Log("~" + name + " was destroy!");
