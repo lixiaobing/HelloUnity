@@ -43,7 +43,8 @@ local UIConfigs =
         scriptName = "Ui/test/MarketUIFrom" , 
         showMode   = 2 , 
         formType   = 3 ,
-        opacity    = 0.5 ,--透明度 
+        opacity    = 0.5 ,--透明度
+        multiple   = true 
         }  ,
 
         ["PropDetailUIForm"] = { 
@@ -52,7 +53,8 @@ local UIConfigs =
         scriptName = "Ui/test/PropDetailUIForm" , 
         showMode = 2 , 
         formType = 3,
-        opacity  = 0.5 ,--透明度 
+        opacity  = 0.5 ,--透明度
+        multiple = true,  
         } ,
 
         ["HeroInfoUIForm"] = { 
@@ -70,7 +72,8 @@ local UIConfigs =
         scriptName = "Ui/test/Tip" , 
         showMode = 1 , 
         formType = 4 ,
-        opacity  = 0 ,--透明度 
+        opacity  = 0 ,--透明度
+        multiple = true 
         }  
 
 }
@@ -132,39 +135,9 @@ function UIManager:createPanel(prefabName)
 end
 
 
--- function UIManager:onShowUIForm(uiForm)
---     local showMode = uiForm:GetShowMode()
---     if showMode == UIFormShowMode.Normal then                    --“普通显示”窗口模式
---         self._DicCurrentShowUIForms[uiForm:GetName()] = uiForm
---     elseif showMode == UIFormShowMode.ReverseChange then         --需要“反向切换”窗口模式
---         table.insert(self._StaCurrentUIForms, 1 ,uiForm)
---     elseif showMode == UIFormShowMode.HideOther then              --“隐藏其他”窗口模式
---         for k , v in pairs(self._DicCurrentShowUIForms) do
---             v:Hide()
---         end
---         for k , v in pairs(self._StaCurrentUIForms) do
---             v:Hide()
---         end
---     end
--- end
-
 function UIManager:GetUIConfig(uiFormName)
     return UIConfigs[uiFormName]
 end
-
--- function UIManager:ShowUIForm(uiFormName)
---     --根据UI窗体的名称，加载到“所有UI窗体”缓存集合中
---     local uiForm = self._DicALLUIForms[uiFormName]
---     if not uiForm then
---         uiForm = self:createUIForm(uiFormName)
---         self._DicALLUIForms[uiFormName] = uiForm
---     end
---     if uiForm == nil then  
---         return
---     end
---     uiForm:Show()
--- end
-
 function UIManager:OpenUIForm(uiFormName)
     --根据UI窗体的名称，加载到“所有UI窗体”缓存集合中
     local uiForm = self._DicALLUIForms[uiFormName]
@@ -182,10 +155,8 @@ function UIManager:OpenUIForm(uiFormName)
         --把当前窗体加载到“当前窗体”集合中。
         self._DicCurrentShowUIForms[uiForm:GetName()] = uiForm
     elseif showMode == UIFormShowMode.ReverseChange then         --需要“反向切换”窗口模式
-        for i,v in ipairs(self._StaCurrentUIForms) do
-            v:HideBackground()
-        end
-        table.insert(self._StaCurrentUIForms, 1 ,uiForm)     
+        table.insert(self._StaCurrentUIForms, 1 ,uiForm) 
+        self:ResetMask()    
     elseif showMode == UIFormShowMode.HideOther then              --“隐藏其他”窗口模式
         for k , v in pairs(self._DicCurrentShowUIForms) do
             v:Hide()
@@ -238,11 +209,25 @@ function UIManager:PopUIFroms(uiForm)
             break
         end
     end
-    if self._StaCurrentUIForms[1] then 
-        self._StaCurrentUIForms[1]:resetBackground()
-    end
-
+    --重置蒙层
+    self:ResetMask()
 end
+
+function UIManager:ResetMask()
+    local mask 
+    for index, uiForm in ipairs(self._StaCurrentUIForms) do
+        if not mask then 
+            if uiForm:HasMask() then 
+                uiForm:ResetMask()
+                mask = uiForm:HasMask()
+            end
+        else
+            uiForm:HideMask()
+        end
+    end
+end
+
+
 
 function UIManager:ExitUIFormsAndDisplayOther(uiForm)     
     uiForm:Hide()

@@ -26,14 +26,22 @@ function BaseUIForm:ctor(uiConfig)
     self:InitUI()
 end
 
-
-function BaseUIForm:resetBackground()
-    self.background.color = Color.New(0,0,0,self.uiConfig.opacity)
+function BaseUIForm:HasMask()
+    return self.uiConfig.opacity > 0  
+  
 end
 
 
-function BaseUIForm:HideBackground()
-    self.background.color = Color.New(0,0,0,0)
+function BaseUIForm:ResetMask()
+    if self:HasMask() then 
+        self.background.color = Color.New(0,0,0,self.uiConfig.opacity)
+    end
+end
+
+function BaseUIForm:HideMask()
+    if self:HasMask() then 
+        self.background.color = Color.New(0,0,0,0)
+    end
 end
 
 function BaseUIForm:InitUI()
@@ -57,9 +65,15 @@ function BaseUIForm:GetFormType()
     return self.uiConfig.formType
 end
 
-function BaseUIForm:GetLucenyType()
-    return self.uiConfig.lucenyType
+-- function BaseUIForm:GetLucenyType()
+--     return self.uiConfig.lucenyType
+-- end
+--多实例
+function BaseUIForm:IsMultiple()
+    return self.uiConfig.multiple
 end
+
+
 
 
 -- --/ <summary>
@@ -70,10 +84,6 @@ function BaseUIForm:SetActive(active)
 end
 function BaseUIForm:Show()
     self.gameObject:SetActive(true)
-    --设置模态窗体调用(必须是弹出窗体)
-    -- if self.uiConfig.formType == UIFormType.PopUp then 
-    --     UIManager:SetMaskWindow(self)
-    -- end
 end
 
 
@@ -83,10 +93,6 @@ end
 -- 隐藏状态
 function BaseUIForm:Hide()
     self.gameObject:SetActive(false)
-    --取消模态窗体调用
-    -- if self.uiConfig.formType == UIFormType.PopUp then 
-    --     UIManager:CancelMaskWindow(self)
-    -- end
 end
 
 function BaseUIForm:Close()
@@ -99,10 +105,6 @@ end
 function BaseUIForm:ReShow()
     print(self.uiConfig.name.." ReShow")
     self.gameObject:SetActive(true)
-    --设置模态窗体调用(必须是弹出窗体)
-    -- if self.uiConfig.formType == UIFormType.PopUp then 
-    --     UIManager:SetMaskWindow(self)
-    -- end
 end
 
 
