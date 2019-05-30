@@ -1,7 +1,7 @@
 BaseUIForm = class("BaseUIForm")
 function BaseUIForm:ctor(uiConfig)
     self.uiConfig     = uiConfig
-    self.gameObject   = UIManager:createPanel("Prefabs/Background")
+    self.gameObject   = UIManager:createPanel("Prefabs/BaseView")
     self.mask         = self.gameObject.transform:Find("Mask")
     self.background   = self.mask:GetComponent("Image")
     self.panel        = UIManager:createPanel(self.uiConfig.prefabName)
@@ -123,6 +123,13 @@ function BaseUIForm:AddClick(gameObject,func)
     self.luaBehaviour:AddClick(gameObject,func)
 end
 
+
+function BaseUIForm:Destroy()
+    if self.gameObject ~= nil then
+        self.gameObject:Destroy()
+        self.gameObject = nil
+    end
+end
 
 
 --1.UI物体，2.动画类型，3.目标值，4.持续时间，5.结束回调

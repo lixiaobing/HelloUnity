@@ -11,6 +11,10 @@ function MarketUIFrom:InitUI()
     self:AddButtonClickEvent("BtnShoe",function()
         self:Open("PropDetailUIForm")
     end)
+
+    self:AddButtonClickEvent("BtnTicket",function()
+        self:Open("MarketUIFrom")
+    end)
 end
 
 
